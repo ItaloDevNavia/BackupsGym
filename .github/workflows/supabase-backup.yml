@@ -2,7 +2,9 @@ name: Supabase Backup
 
 on:
   schedule:
-    - cron: "0 * * * *"   # Se ejecuta cada hora
+    # 0 4,16 * * * = Se ejecuta a las 04:00 y 16:00 UTC
+    # Lo que equivale a las 12:00 AM y 12:00 PM en hora local (UTC-4)
+    - cron: "0 4,16 * * *"
   workflow_dispatch:      # Permite ejecutarlo manualmente desde GitHub
 
 permissions:
