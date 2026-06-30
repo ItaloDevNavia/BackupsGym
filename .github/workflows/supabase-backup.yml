@@ -2,7 +2,7 @@ name: Supabase Backup
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 * * * *"   # cada hora
   workflow_dispatch:
 
 permissions:
@@ -21,9 +21,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Crear backup
+      - name: Crear backup (IPv4 safe)
         env:
-          DB_HOST: db.puehhniulzfadfzydxeu.supabase.co
+          DB_HOST: db.rljekhmsxorshudndbfy.supabase.co
           DB_USER: postgres
           DB_PASS: ${{ secrets.DB_PASSWORD }}
           DB_NAME: postgres
@@ -34,8 +34,13 @@ jobs:
 
           FILE="backup-$(date +'%Y-%m-%d_%H-%M').dump"
 
+          # Forzar IPv4 resolviendo a IP real
+          DB_IP=$(getent ahosts $DB_HOST | awk '{print $1}' | grep -v ':' | head -n 1)
+
+          echo "Using DB IP: $DB_IP"
+
           PGPASSWORD=$DB_PASS pg_dump \
-            -h $DB_HOST \
+            -h $DB_IP \
             -U $DB_USER \
             -d $DB_NAME \
             --no-owner \
@@ -44,6 +49,8 @@ jobs:
             -f "backups/$FILE"
 
           gzip "backups/$FILE"
+
+          ls -lh backups
 
       - name: Borrar backups viejos (30 días)
         run: |
