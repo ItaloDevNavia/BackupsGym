@@ -2,8 +2,8 @@ name: Supabase Backup
 
 on:
   schedule:
-    - cron: "0 * * * *"   # cada hora
-  workflow_dispatch:
+    - cron: "0 * * * *"   # Se ejecuta cada hora
+  workflow_dispatch:      # Permite ejecutarlo manualmente desde GitHub
 
 permissions:
   contents: write
@@ -16,19 +16,23 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Instalar PostgreSQL client
+      - name: Instalar PostgreSQL client 17
         run: |
+          # Agregar el repositorio oficial de PostgreSQL para obtener la versión 17
+          sudo apt-get install -y curl ca-certificates
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          sudo sh -c 'echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          
+          # Instalar específicamente la versión 17 del cliente
+          sudo apt-get install -y postgresql-client-17
 
       - name: Crear backup usando Supabase Pooler
         env:
-          # HOST LIMPIO: Solo la dirección del servidor
           DB_HOST: aws-1-us-west-2.pooler.supabase.com
           DB_PORT: 6543
-          # USUARIO ACTUALIZADO: Sacado de tu cadena de conexión
           DB_USER: postgres.puehhniulzfadfzydxeu
-          # LA CONTRASEÑA SE MANTIENE COMO SECRETO (¡Es lo más seguro!)
           DB_PASS: ${{ secrets.DB_PASSWORD }}
           DB_NAME: postgres
         run: |
@@ -39,7 +43,7 @@ jobs:
 
           echo "Conectando a la base de datos a través del Pooler..."
 
-          # Usar comillas dobles evita errores de sintaxis si alguna variable falla
+          # Ejecutar pg_dump usando las variables configuradas
           PGPASSWORD="$DB_PASS" pg_dump \
             -h "$DB_HOST" \
             -p "$DB_PORT" \
