@@ -24,7 +24,7 @@ jobs:
       - name: Crear backup usando Supabase Pooler
         env:
           # REEMPLAZA ESTO CON EL HOST DE TU CONNECTION POOLER (Ej: aws-0-us-east-1.pooler.supabase.com)
-          DB_HOST: tu-host-del-pooler.supabase.com
+          DB_HOST: postgresql://postgres.puehhniulzfadfzydxeu:ITALOMEOLVIDELACONTRASEÑA@aws-1-us-west-2.pooler.supabase.com:6543/postgres
           DB_PORT: 6543
           DB_USER: postgres.rljekhmsxorshudndbfy
           DB_PASS: ${{ secrets.DB_PASSWORD }}
