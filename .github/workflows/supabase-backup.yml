@@ -21,35 +21,36 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Crear backup (IPv4 safe)
+      - name: Crear backup usando Supabase Pooler
         env:
-          DB_HOST: db.rljekhmsxorshudndbfy.supabase.co
-          DB_USER: postgres
+          # REEMPLAZA ESTO CON EL HOST DE TU CONNECTION POOLER (Ej: aws-0-us-east-1.pooler.supabase.com)
+          DB_HOST: tu-host-del-pooler.supabase.com
+          DB_PORT: 6543
+          DB_USER: postgres.rljekhmsxorshudndbfy
           DB_PASS: ${{ secrets.DB_PASSWORD }}
           DB_NAME: postgres
         run: |
           set -e
 
           mkdir -p backups
-
           FILE="backup-$(date +'%Y-%m-%d_%H-%M').dump"
 
-          # Forzar IPv4 resolviendo a IP real
-          DB_IP=$(getent ahosts $DB_HOST | awk '{print $1}' | grep -v ':' | head -n 1)
+          echo "Conectando a la base de datos a través del Pooler..."
 
-          echo "Using DB IP: $DB_IP"
-
-          PGPASSWORD=$DB_PASS pg_dump \
-            -h $DB_IP \
-            -U $DB_USER \
-            -d $DB_NAME \
+          # Usar comillas dobles evita errores de sintaxis si alguna variable falla
+          PGPASSWORD="$DB_PASS" pg_dump \
+            -h "$DB_HOST" \
+            -p "$DB_PORT" \
+            -U "$DB_USER" \
+            -d "$DB_NAME" \
             --no-owner \
             --no-privileges \
             --format=custom \
             -f "backups/$FILE"
 
           gzip "backups/$FILE"
-
+          
+          echo "Backup generado correctamente:"
           ls -lh backups
 
       - name: Borrar backups viejos (30 días)
@@ -64,7 +65,7 @@ jobs:
           git add backups
 
           if git diff --cached --quiet; then
-            echo "Sin cambios"
+            echo "Sin cambios para commitear."
             exit 0
           fi
 
