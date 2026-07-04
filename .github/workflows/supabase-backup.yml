@@ -32,9 +32,10 @@ jobs:
 
       - name: Crear backup usando Supabase Pooler
         env:
-          DB_HOST: aws-1-us-west-2.pooler.supabase.com
+          # HOST Y USUARIO ACTUALIZADOS A LA NUEVA BASE DE DATOS
+          DB_HOST: aws-0-us-east-1.pooler.supabase.com
           DB_PORT: 6543
-          DB_USER: postgres.puehhniulzfadfzydxeu
+          DB_USER: postgres.ntthqojiowgkymqmhbrv
           DB_PASS: ${{ secrets.DB_PASSWORD }}
           DB_NAME: postgres
         run: |
